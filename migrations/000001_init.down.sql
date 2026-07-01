@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS sso.users;
+
+DROP SCHEMA IF EXISTS sso;

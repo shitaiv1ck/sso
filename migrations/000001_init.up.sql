@@ -1,0 +1,8 @@
+CREATE SCHEMA sso;
+
+CREATE TABLE sso.users(
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    pass_hash VARCHAR(255) NOT NULL
+);
+CREATE INDEX idx_users_email ON sso.users(email);
