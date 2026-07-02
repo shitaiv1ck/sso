@@ -8,6 +8,9 @@ import (
 	"github.com/shitaiv1ck/sso/internal/core/logger"
 	"github.com/shitaiv1ck/sso/internal/core/repository/postgres"
 	grpcserver "github.com/shitaiv1ck/sso/internal/core/transport/grpc/server"
+	authrep "github.com/shitaiv1ck/sso/internal/features/auth/repository"
+	authsrvc "github.com/shitaiv1ck/sso/internal/features/auth/service"
+	authgrpc "github.com/shitaiv1ck/sso/internal/features/auth/transport/grpc"
 	"go.uber.org/zap"
 )
 
@@ -29,7 +32,14 @@ func main() {
 	}
 	defer connPool.Close()
 
+	log.Debug("init feature: auth...")
+	authRep := authrep.NewAuthRep(connPool)
+	authService := authsrvc.NewAuthService(authRep)
+	authGRPC := authgrpc.NewAuthGRPC(authService, log)
+
 	server := grpcserver.NewGRPCServer(log, grpcserver.NewConfigMust())
+	server.RegisterServices(authGRPC)
+
 	if err := server.Run(ctx); err != nil {
 		panic(err)
 	}
