@@ -1,3 +1,7 @@
+DROP INDEX IF EXISTS idx_apps_name;
+DROP TABLE IF EXISTS sso.apps;
+
+DROP INDEX IF EXISTS idx_users_email;
 DROP TABLE IF EXISTS sso.users;
 
 DROP SCHEMA IF EXISTS sso;

@@ -7,6 +7,7 @@ import (
 
 	ssov1 "github.com/shitaiv1ck/protos/gen/go/sso"
 	"github.com/shitaiv1ck/sso/internal/core/logger"
+	authgrpc "github.com/shitaiv1ck/sso/internal/features/auth/transport/grpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -25,8 +26,8 @@ func NewGRPCServer(log *logger.Logger, config Config) *GRPCServer {
 	}
 }
 
-func (s *GRPCServer) RegisterServices() {
-	ssov1.RegisterAuthServer(s.server, nil)
+func (s *GRPCServer) RegisterServices(auth *authgrpc.AuthGRPC) {
+	ssov1.RegisterAuthServer(s.server, auth)
 }
 
 func (s GRPCServer) Run(ctx context.Context) error {
