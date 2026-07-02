@@ -60,13 +60,13 @@ make migrate-up
 
 **Вариант 1: Ручное добавление**
 ```sql
-INSERT INTO apps (name) VALUES ('your_app_name');
+INSERT INTO sso.apps (name) VALUES ('your_app_name');
 ```
 
 **Вариант 2: Через миграцию**
 ```bash
 make migrate-create seq=value
-# Затем добавьте SQL зарос в созданный файл миграции и выполните make migrate-up
+# Затем добавьте SQL запрос в созданный файл миграции и выполните make migrate-up
 ```
 
 ### 5. Настройка JWT
