@@ -8,4 +8,6 @@ var (
 	ErrInvalidCredentials = errors.New("Invalid credentials")
 	ErrKeyNotConfigured   = errors.New("Key not configured")
 	ErrNotFound           = errors.New("Not found")
+	ErrRefSession         = errors.New("Invalid refresh session")
+	ErrInvalidJWT         = errors.New("Invalid JWT")
 )

@@ -44,6 +44,8 @@ func (s *Status) SetStatusCode(err error) {
 		s.statusCode = codes.Unauthenticated
 	case errors.Is(err, errs.ErrNotFound):
 		s.statusCode = codes.NotFound
+	case errors.Is(err, errs.ErrRefSession):
+		s.statusCode = codes.Unauthenticated
 	default:
 		s.statusCode = codes.Internal
 	}

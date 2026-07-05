@@ -4,10 +4,16 @@ export
 export PROJECT_ROOT=${shell pwd}
 
 env-up:
-	@docker compose up -d sso-postgres
+	@docker compose up -d sso-postgres && \
+	docker compose up -d sso-redis && \
+	docker compose up -d sso-kafka && \
+	docker compose up -d sso-kafka-ui
 
 env-down:
-	@docker compose down sso-postgres
+	@docker compose down sso-postgres && \
+	docker compose down sso-redis  && \
+	docker compose down sso-kafka && \
+	docker compose down sso-kafka-ui
 
 migrate-create:
 	@if [ -z "${seq}" ]; then \

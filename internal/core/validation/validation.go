@@ -49,3 +49,11 @@ func ValidateID(id int) error {
 
 	return nil
 }
+
+func ValidateRefreshToken(token string) error {
+	if len(strings.TrimSpace(token)) < 32 {
+		return fmt.Errorf("refresh token length must be at least 32: %w", errs.ErrInvalidArg)
+	}
+
+	return nil
+}

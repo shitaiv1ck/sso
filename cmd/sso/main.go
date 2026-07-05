@@ -5,10 +5,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/shitaiv1ck/sso/internal/core/broker/kafka"
 	"github.com/shitaiv1ck/sso/internal/core/logger"
 	"github.com/shitaiv1ck/sso/internal/core/repository/postgres"
+	"github.com/shitaiv1ck/sso/internal/core/repository/redis"
 	grpcserver "github.com/shitaiv1ck/sso/internal/core/transport/grpc/server"
-	authrep "github.com/shitaiv1ck/sso/internal/features/auth/repository"
+	authkafka "github.com/shitaiv1ck/sso/internal/features/auth/broker/kafka"
+	authpg "github.com/shitaiv1ck/sso/internal/features/auth/repository/postgres"
+	authredis "github.com/shitaiv1ck/sso/internal/features/auth/repository/redis"
 	authsrvc "github.com/shitaiv1ck/sso/internal/features/auth/service"
 	authgrpc "github.com/shitaiv1ck/sso/internal/features/auth/transport/grpc"
 	"go.uber.org/zap"
@@ -32,9 +36,29 @@ func main() {
 	}
 	defer connPool.Close()
 
+	log.Debug("init redis connection...")
+	redisConn, err := redis.NewRedis(ctx, redis.NewConfigMust())
+	if err != nil {
+		log.Error("failed to init redis connection", zap.Error(err))
+
+		panic(err)
+	}
+	defer redisConn.Close()
+
+	log.Debug("init kafka connection...")
+	kafkaConn, err := kafka.NewKafkaConn(ctx, kafka.NewConfigMust())
+	if err != nil {
+		log.Error("failed to init kafka connection", zap.Error(err))
+
+		panic(err)
+	}
+	defer kafkaConn.Close()
+
 	log.Debug("init feature: auth...")
-	authRep := authrep.NewAuthRep(connPool)
-	authService := authsrvc.NewAuthService(authRep)
+	authPG := authpg.NewAuthRep(connPool)
+	authRedis := authredis.NewAuthRep(redisConn)
+	authKafka := authkafka.NewAuthKafka(kafkaConn)
+	authService := authsrvc.NewAuthService(authsrvc.NewConfigMust(), authPG, connPool, authRedis, authKafka)
 	authGRPC := authgrpc.NewAuthGRPC(authService, log)
 
 	server := grpcserver.NewGRPCServer(log, grpcserver.NewConfigMust())

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS sso.sessions;
+
 DROP INDEX IF EXISTS idx_apps_name;
 DROP TABLE IF EXISTS sso.apps;
 

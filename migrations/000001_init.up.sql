@@ -14,3 +14,12 @@ CREATE TABLE sso.apps(
     name VARCHAR(255) NOT NULL UNIQUE CHECK (char_length(name) BETWEEN 2 AND 255)
 );
 CREATE INDEX idx_apps_name ON sso.apps(name);
+
+CREATE TABLE sso.sessions(
+    refresh_token VARCHAR(255) NOT NULL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES sso.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL,
+
+    CHECK (expires_at > created_at)
+);

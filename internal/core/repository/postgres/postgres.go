@@ -10,12 +10,20 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Postgres interface {
+type SQLExecuter interface {
 	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+}
+
+type Postgres interface {
+	SQLExecuter
 
 	GetTimeout() time.Duration
+}
+
+type TransactionManager interface {
+	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
 }
 
 type ConnPool struct {
