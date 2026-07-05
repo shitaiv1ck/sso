@@ -195,7 +195,7 @@ sso/
 │           ├── service/         # Бизнес-логика (Register, Login, Refresh, Logout)
 │           └── transport/       # gRPC-обработчики
 └── migrations/                  # SQL миграции для PostgreSQL
-
+```
 ## Схема базы данных
 
 ### Схема `sso`
@@ -287,67 +287,3 @@ Redis используется для хранения черного списк
 | `make sso-run` | Запуск gRPC-сервера |
 | `make test` | Запуск тестов |
 | `make build` | Сборка приложения |
-```
-sso
-├─ Makefile
-├─ README.md
-├─ cmd
-│  └─ sso
-│     └─ main.go
-├─ docker-compose.yaml
-├─ go.mod
-├─ go.sum
-├─ internal
-│  ├─ core
-│  │  ├─ broker
-│  │  │  └─ kafka
-│  │  │     ├─ config.go
-│  │  │     └─ kafka.go
-│  │  ├─ domain
-│  │  │  ├─ app.go
-│  │  │  ├─ session.go
-│  │  │  ├─ token.go
-│  │  │  └─ user.go
-│  │  ├─ errors
-│  │  │  └─ errors.go
-│  │  ├─ logger
-│  │  │  ├─ config.go
-│  │  │  └─ logger.go
-│  │  ├─ repository
-│  │  │  ├─ postgres
-│  │  │  │  ├─ config.go
-│  │  │  │  └─ postgres.go
-│  │  │  └─ redis
-│  │  │     ├─ config.go
-│  │  │     └─ redis.go
-│  │  ├─ transport
-│  │  │  └─ grpc
-│  │  │     ├─ server
-│  │  │     │  ├─ config.go
-│  │  │     │  └─ server.go
-│  │  │     └─ status
-│  │  │        └─ status.go
-│  │  └─ validation
-│  │     └─ validation.go
-│  └─ features
-│     └─ auth
-│        ├─ broker
-│        │  └─ kafka
-│        │     ├─ dto.go
-│        │     └─ kafka.go
-│        ├─ repository
-│        │  ├─ postgres
-│        │  │  └─ repository.go
-│        │  └─ redis
-│        │     └─ redis.go
-│        ├─ service
-│        │  ├─ config.go
-│        │  └─ service.go
-│        └─ transport
-│           └─ grpc
-│              └─ transport.go
-└─ migrations
-   ├─ 000001_init.down.sql
-   └─ 000001_init.up.sql
-
-```
