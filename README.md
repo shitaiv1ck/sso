@@ -285,5 +285,3 @@ Redis используется для хранения черного списк
 | `make migrate-down` | Откат миграций |
 | `make migrate-create` | Создание новой миграции (требует `seq=value`) |
 | `make sso-run` | Запуск gRPC-сервера |
-| `make test` | Запуск тестов |
-| `make build` | Сборка приложения |
