@@ -8,17 +8,17 @@ import (
 	"github.com/shitaiv1ck/sso/internal/core/repository/redis"
 )
 
-type AuthRepository struct {
+type AuthRedis struct {
 	store redis.Redis
 }
 
-func NewAuthRep(store redis.Redis) *AuthRepository {
-	return &AuthRepository{
+func NewAuthRedis(store redis.Redis) *AuthRedis {
+	return &AuthRedis{
 		store: store,
 	}
 }
 
-func (r *AuthRepository) RevokeJWT(ctx context.Context, jwt domain.Token) error {
+func (r *AuthRedis) RevokeJWT(ctx context.Context, jwt domain.Token) error {
 	ctx, cancel := context.WithTimeout(ctx, r.store.GetTimeout())
 	defer cancel()
 

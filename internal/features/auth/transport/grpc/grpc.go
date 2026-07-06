@@ -55,7 +55,7 @@ func (t *AuthGRPC) Register(ctx context.Context, req *ssov1.RegisterRequest) (*s
 }
 
 func (t *AuthGRPC) Login(ctx context.Context, req *ssov1.LoginRequest) (*ssov1.LoginResponse, error) {
-	t.log.Debug("invoke register user")
+	t.log.Debug("invoke login user")
 
 	grpcStatus := grpcstatus.NewGRPCStatus(t.log)
 

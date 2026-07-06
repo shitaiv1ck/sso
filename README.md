@@ -9,7 +9,7 @@ gRPC-сервис для аутентификации и авторизации 
 - Аутентификация пользователей с выдачей JWT-токенов и refresh-токенов
 - Обновление JWT-токенов через refresh-токены
 - Логаут с добавлением JWT-токена в черный список в Redis
-- Смена пароля и email
+- Смена пароля и email с рассылкой события `user.updated` при смене email через Kafka
 
 ## Технологический стэк
 
@@ -111,7 +111,7 @@ make sso-run
 
 Графический интерфейс для управления Kafka будет доступен на `localhost:8080` (адрес настраивается через `KAFKA_HOST` и `KAFKA_PORT`).
 
-**ВАЖНО**: при первом запуске необходимо самостоятельно перейти по ссылке `http://localhost:8080` и вручную добавить топик `user.registered`
+**ВАЖНО**: при первом запуске необходимо самостоятельно перейти по ссылке `http://localhost:8080` и вручную добавить топики `user.registered` и `user.updated`
 
 ## Взаимодействие с сервисом
 
@@ -155,7 +155,7 @@ go get -u github.com/shitaiv1ck/protos@latest
 
 **Register** - регистрирует нового пользователя в системе. При успешной регистрации:
 - Возвращает `user_id`
-- Отправляет событие о регистрации в Kafka (топик `user.created`)
+- Отправляет событие о регистрации в Kafka (топик `user.registered`)
 
 **Login** - аутентифицирует пользователя по email и паролю. При успешном входе:
 - Создает сессию в БД с refresh-токеном
@@ -181,34 +181,79 @@ go get -u github.com/shitaiv1ck/protos@latest
 **ChangeEmail** - изменяет email пользователя:
 - Требует подтверждения паролем
 - Проверяет, что новый email не используется другим пользователем
+- Отправляет событие о смене email в Kafka (топик `user.updated`)
 
 ## Структура проекта
 
 ```
 sso/
-├── Makefile                     # Команды для сборки, запуска и миграций
-├── README.md                    # Документация проекта
-├── docker-compose.yaml          # Docker Compose для всего сервиса
+├── Makefile                          # Команды для сборки, запуска и миграций
+├── README.md                         # Документация проекта
+├── docker-compose.yaml               # Docker Compose для всего сервиса
 ├── go.mod
 ├── go.sum
 ├── cmd/
-│   └── sso/                     # Точка входа в приложение
+│   └── sso/                          # Точка входа в приложение
+│       └── main.go
 ├── internal/
-│   ├── core/                    # Общие компоненты
-│   │   ├── broker/              # Базовый клиент для работы с Kafka
-│   │   ├── domain/              # Доменные модели (User, App, Session, Token)
-│   │   ├── errors/              # Кастомные ошибки и их классификация
-│   │   ├── logger/              # Настройка и обертка над логгером
-│   │   ├── repository/          # PostgreSQL и Redis
-│   │   ├── transport/           # gRPC-сервер и статусы
-│   │   └── validation/          # Валидация входных данных
+│   ├── core/                         # Общие компоненты
+│   │   ├── broker/                   # Базовый клиент для работы с Kafka
+│   │   │   ├── config.go
+│   │   │   └── kafka.go
+│   │   ├── domain/                   # Доменные модели
+│   │   │   ├── app.go
+│   │   │   ├── session.go
+│   │   │   ├── token.go
+│   │   │   └── user.go
+│   │   ├── errors/                   # Кастомные ошибки
+│   │   │   └── errors.go
+│   │   ├── logger/                   # Настройка логгера
+│   │   │   ├── config.go
+│   │   │   └── logger.go
+│   │   ├── repository/               # PostgreSQL и Redis
+│   │   │   ├── postgres/
+│   │   │   │   ├── config.go
+│   │   │   │   └── postgres.go
+│   │   │   └── redis/
+│   │   │       ├── config.go
+│   │   │       └── redis.go
+│   │   ├── transport/                # gRPC-сервер и статусы
+│   │   │   ├── server/
+│   │   │   │   ├── config.go
+│   │   │   │   └── server.go
+│   │   │   └── status/
+│   │   │       └── status.go
+│   │   └── validation/               # Валидация данных
+│   │       └── validation.go
 │   └── features/
-│       └── auth/                # Feature: Аутентификация и управление аккаунтом
-│           ├── broker/          # Публикация событий в Kafka
-│           ├── repository/      # Работа с PostgreSQL и Redis (черный список)
-│           ├── service/         # Бизнес-логика (Register, Login, Refresh, Logout)
-│           └── transport/       # gRPC-обработчики
-└── migrations/                  # SQL миграции для PostgreSQL
+│       ├── account/                  # Feature: Управление аккаунтом
+│       │   ├── broker/               # Публикация событий в Kafka
+│       │   │   ├── dto.go
+│       │   │   └── producer.go
+│       │   ├── repository/           # Работа с PostgreSQL
+│       │   │   └── postgres/
+│       │   │       └── postgres.go
+│       │   ├── service/              # Бизнес-логика (ChangePassword, ChangeEmail)
+│       │   │   └── service.go
+│       │   └── transport/            # gRPC-обработчики
+│       │       └── grpc.go
+│       └── auth/                     # Feature: Аутентификация и регистрация
+│           ├── broker/               # Публикация событий в Kafka
+│           │   ├── dto.go
+│           │   └── producer.go
+│           ├── repository/           # Работа с PostgreSQL и Redis (черный список)
+│           │   ├── postgres/
+│           │   │   └── postgres.go
+│           │   └── redis/
+│           │       └── redis.go
+│           ├── service/              # Бизнес-логика (Register, Login, Refresh, Logout)
+│           │   ├── config.go
+│           │   └── service.go
+│           └── transport/            # gRPC-обработчики
+│               └── grpc.go
+└── migrations/                       # SQL миграции для PostgreSQL
+    ├── 000001_init.down.sql
+    └── 000001_init.up.sql
 ```
 ## Схема базы данных
 

@@ -3,7 +3,7 @@ package authkafka
 import (
 	"context"
 
-	"github.com/shitaiv1ck/sso/internal/core/broker/kafka"
+	"github.com/shitaiv1ck/sso/internal/core/client/kafka"
 	"github.com/shitaiv1ck/sso/internal/core/domain"
 )
 
