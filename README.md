@@ -300,7 +300,6 @@ sso/
 |------|-----|-------------|----------|
 | `refresh_token` | VARCHAR(255) | `PRIMARY KEY` | Уникальный refresh-токен |
 | `user_id` | INT | `NOT NULL`, `REFERENCES sso.users(id) ON DELETE CASCADE` | Идентификатор пользователя |
-| `app_id` | INT | `NOT NULL`, `REFERENCES sso.apps(id) ON DELETE CASCADE` | Идентификатор приложения |
 | `created_at` | TIMESTAMPTZ | `NOT NULL`, `DEFAULT NOW()` | Время создания сессии |
 | `expires_at` | TIMESTAMPTZ | `NOT NULL` | Время истечения сессии |
 
@@ -309,7 +308,6 @@ sso/
 
 **Особенности:**
 - При удалении пользователя все его сессии автоматически удаляются (CASCADE)
-- При удалении приложения все связанные сессии автоматически удаляются (CASCADE)
 
 ## Интеграция с Redis
 
