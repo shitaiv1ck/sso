@@ -17,16 +17,16 @@ func NewAuthKafka(producer kafka.Producer) *AuthKafka {
 	}
 }
 
-func (k *AuthKafka) EventUserCreated(ctx context.Context, user domain.User) error {
+func (k *AuthKafka) EventUserRegistered(ctx context.Context, user domain.User) error {
 	ctx, cancel := context.WithTimeout(ctx, k.producer.GetTimeout())
 	defer cancel()
 
-	msg := UserCreatedDTO{
+	msg := UserRegisteredDTO{
 		UserID: user.ID,
 		Email:  user.Email,
 	}
 
-	record, err := k.producer.NewRecord("user.created", msg)
+	record, err := k.producer.NewRecord("user.registered", msg)
 	if err != nil {
 		return err
 	}

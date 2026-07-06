@@ -47,7 +47,7 @@ type AuthRedis interface {
 }
 
 type AuthKafka interface {
-	EventUserCreated(ctx context.Context, user domain.User) error
+	EventUserRegistered(ctx context.Context, user domain.User) error
 }
 
 func NewAuthService(
@@ -81,7 +81,7 @@ func (s *AuthService) Register(ctx context.Context, email string, password strin
 		return -1, fmt.Errorf("failed to save user: %w", err)
 	}
 
-	s.kafka.EventUserCreated(ctx, savedUser)
+	s.kafka.EventUserRegistered(ctx, savedUser)
 
 	return savedUser.ID, nil
 }

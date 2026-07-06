@@ -7,7 +7,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-      - ${PROJECT_ROOT}/out/pgdata:/var/lib/postgresql
+      - ${PROJECT_ROOT}/out/pg/data:/var/lib/postgresql
     ports:
       - ${POSTGRES_PORT}:5432
     restart:
@@ -29,7 +29,7 @@ services:
       - REDIS_DB=${REDIS_DB}
     entrypoint: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
-      - ${PROJECT_ROOT}/out/redisdata:/data
+      - ${PROJECT_ROOT}/out/redis/data:/data
     ports:
       - ${REDIS_PORT}:6379
     restart:
@@ -53,7 +53,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
     volumes:
-      - ${PROJECT_ROOT}/out/kafkadata:/tmp/kafka-logs
+      - ${PROJECT_ROOT}/out/kafka/data:/tmp/kafka-logs
     ports:
       - 9092:9092
 
