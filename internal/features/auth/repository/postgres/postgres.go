@@ -12,17 +12,17 @@ import (
 	"github.com/shitaiv1ck/sso/internal/core/repository/postgres"
 )
 
-type AuthRepository struct {
+type AuthPostgres struct {
 	store postgres.Postgres
 }
 
-func NewAuthRep(store postgres.Postgres) *AuthRepository {
-	return &AuthRepository{
+func NewAuthPG(store postgres.Postgres) *AuthPostgres {
+	return &AuthPostgres{
 		store: store,
 	}
 }
 
-func (r *AuthRepository) SaveUser(ctx context.Context, user domain.User) (domain.User, error) {
+func (r *AuthPostgres) SaveUser(ctx context.Context, user domain.User) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.store.GetTimeout())
 	defer cancel()
 
@@ -55,7 +55,7 @@ func (r *AuthRepository) SaveUser(ctx context.Context, user domain.User) (domain
 	return savedUser, nil
 }
 
-func (r *AuthRepository) FindUser(ctx context.Context, user domain.User) (domain.User, error) {
+func (r *AuthPostgres) FindUser(ctx context.Context, user domain.User) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.store.GetTimeout())
 	defer cancel()
 
@@ -84,7 +84,7 @@ func (r *AuthRepository) FindUser(ctx context.Context, user domain.User) (domain
 	return foundUser, nil
 }
 
-func (r *AuthRepository) FindApp(ctx context.Context, app domain.App) (domain.App, error) {
+func (r *AuthPostgres) FindApp(ctx context.Context, app domain.App) (domain.App, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.store.GetTimeout())
 	defer cancel()
 
@@ -112,7 +112,7 @@ func (r *AuthRepository) FindApp(ctx context.Context, app domain.App) (domain.Ap
 	return foundApp, nil
 }
 
-func (r *AuthRepository) SaveSession(ctx context.Context, session domain.Session) (string, error) {
+func (r *AuthPostgres) SaveSession(ctx context.Context, session domain.Session) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.store.GetTimeout())
 	defer cancel()
 
@@ -139,7 +139,7 @@ func (r *AuthRepository) SaveSession(ctx context.Context, session domain.Session
 	return refreshToken, nil
 }
 
-func (r *AuthRepository) SaveTXSession(ctx context.Context, tx postgres.SQLExecuter, session domain.Session) (string, error) {
+func (r *AuthPostgres) SaveTXSession(ctx context.Context, tx postgres.SQLExecuter, session domain.Session) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.store.GetTimeout())
 	defer cancel()
 
@@ -166,7 +166,7 @@ func (r *AuthRepository) SaveTXSession(ctx context.Context, tx postgres.SQLExecu
 	return refreshToken, nil
 }
 
-func (r *AuthRepository) DeleteSession(ctx context.Context, refreshToken string) error {
+func (r *AuthPostgres) DeleteSession(ctx context.Context, refreshToken string) error {
 	ctx, cancel := context.WithTimeout(ctx, r.store.GetTimeout())
 	defer cancel()
 
@@ -187,7 +187,7 @@ func (r *AuthRepository) DeleteSession(ctx context.Context, refreshToken string)
 	return nil
 }
 
-func (r *AuthRepository) DeleteTXSession(
+func (r *AuthPostgres) DeleteTXSession(
 	ctx context.Context,
 	tx postgres.SQLExecuter,
 	refreshToken string,

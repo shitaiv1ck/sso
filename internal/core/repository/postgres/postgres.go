@@ -22,7 +22,7 @@ type Postgres interface {
 	GetTimeout() time.Duration
 }
 
-type TransactionManager interface {
+type TxManager interface {
 	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
 }
 

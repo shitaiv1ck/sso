@@ -2,6 +2,7 @@ package grpcstatus
 
 import (
 	"errors"
+	"fmt"
 
 	errs "github.com/shitaiv1ck/sso/internal/core/errors"
 	"github.com/shitaiv1ck/sso/internal/core/logger"
@@ -31,7 +32,7 @@ func (s *Status) Error(msg string, err error) error {
 		s.log.Warn(msg, zap.Error(err), zap.String("code", s.statusCode.String()))
 	}
 
-	return status.Error(s.statusCode, msg)
+	return status.Error(s.statusCode, fmt.Sprintf("%s: %s", msg, err))
 }
 
 func (s *Status) SetStatusCode(err error) {

@@ -5,12 +5,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shitaiv1ck/sso/internal/core/broker/kafka"
+	"github.com/shitaiv1ck/sso/internal/core/client/kafka"
 	"github.com/shitaiv1ck/sso/internal/core/logger"
 	"github.com/shitaiv1ck/sso/internal/core/repository/postgres"
 	"github.com/shitaiv1ck/sso/internal/core/repository/redis"
 	grpcserver "github.com/shitaiv1ck/sso/internal/core/transport/grpc/server"
-	authkafka "github.com/shitaiv1ck/sso/internal/features/auth/broker/kafka"
+	acckafka "github.com/shitaiv1ck/sso/internal/features/account/client/kafka"
+	accpg "github.com/shitaiv1ck/sso/internal/features/account/repository/postgres"
+	accsrvc "github.com/shitaiv1ck/sso/internal/features/account/service"
+	accgrpc "github.com/shitaiv1ck/sso/internal/features/account/transport/grpc"
+	authkafka "github.com/shitaiv1ck/sso/internal/features/auth/client/kafka"
 	authpg "github.com/shitaiv1ck/sso/internal/features/auth/repository/postgres"
 	authredis "github.com/shitaiv1ck/sso/internal/features/auth/repository/redis"
 	authsrvc "github.com/shitaiv1ck/sso/internal/features/auth/service"
@@ -55,14 +59,20 @@ func main() {
 	defer kafkaConn.Close()
 
 	log.Debug("init feature: auth...")
-	authPG := authpg.NewAuthRep(connPool)
-	authRedis := authredis.NewAuthRep(redisConn)
+	authPG := authpg.NewAuthPG(connPool)
+	authRedis := authredis.NewAuthRedis(redisConn)
 	authKafka := authkafka.NewAuthKafka(kafkaConn)
 	authService := authsrvc.NewAuthService(authsrvc.NewConfigMust(), authPG, connPool, authRedis, authKafka)
 	authGRPC := authgrpc.NewAuthGRPC(authService, log)
 
+	log.Debug("init feature: account...")
+	accPG := accpg.NewAccountPG(connPool)
+	accKafka := acckafka.NewAccountKafka(kafkaConn)
+	accService := accsrvc.NewAccountService(accPG, connPool, accKafka)
+	accGRPC := accgrpc.NewAccountGRPC(accService, log)
+
 	server := grpcserver.NewGRPCServer(log, grpcserver.NewConfigMust())
-	server.RegisterServices(authGRPC)
+	server.RegisterServices(authGRPC, accGRPC)
 
 	if err := server.Run(ctx); err != nil {
 		panic(err)

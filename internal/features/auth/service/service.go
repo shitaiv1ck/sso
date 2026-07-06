@@ -24,7 +24,7 @@ type AuthService struct {
 	config Config
 
 	pg AuthPostgres
-	tx postgres.TransactionManager
+	tx postgres.TxManager
 
 	redis AuthRedis
 
@@ -53,7 +53,7 @@ type AuthKafka interface {
 func NewAuthService(
 	config Config,
 	pg AuthPostgres,
-	tx postgres.TransactionManager,
+	tx postgres.TxManager,
 	redis AuthRedis,
 	kafka AuthKafka,
 ) *AuthService {
@@ -81,7 +81,10 @@ func (s *AuthService) Register(ctx context.Context, email string, password strin
 		return -1, fmt.Errorf("failed to save user: %w", err)
 	}
 
-	s.kafka.EventUserRegistered(ctx, savedUser)
+	go func() {
+		bgCtx := context.Background()
+		s.kafka.EventUserRegistered(bgCtx, savedUser)
+	}()
 
 	return savedUser.ID, nil
 }
