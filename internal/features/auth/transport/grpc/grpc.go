@@ -14,7 +14,6 @@ type AuthGRPC struct {
 	ssov1.UnimplementedAuthServer
 
 	service AuthService
-	log     *logger.Logger
 }
 
 type AuthService interface {
@@ -24,17 +23,17 @@ type AuthService interface {
 	Logout(ctx context.Context, refreshToken string, accessToken string) error
 }
 
-func NewAuthGRPC(service AuthService, log *logger.Logger) *AuthGRPC {
+func NewAuthGRPC(service AuthService) *AuthGRPC {
 	return &AuthGRPC{
 		service: service,
-		log:     log,
 	}
 }
 
 func (t *AuthGRPC) Register(ctx context.Context, req *ssov1.RegisterRequest) (*ssov1.RegisterResponse, error) {
-	t.log.Debug("invoke register user")
+	log := logger.FromContext(ctx)
+	grpcStatus := grpcstatus.NewGRPCStatus(log)
 
-	grpcStatus := grpcstatus.NewGRPCStatus(t.log)
+	log.Debug("invoke register user")
 
 	if err := validation.ValidateEmail(req.GetEmail()); err != nil {
 		return nil, grpcStatus.Error("failed to validate email", errs.ErrInvalidArg)
@@ -55,9 +54,10 @@ func (t *AuthGRPC) Register(ctx context.Context, req *ssov1.RegisterRequest) (*s
 }
 
 func (t *AuthGRPC) Login(ctx context.Context, req *ssov1.LoginRequest) (*ssov1.LoginResponse, error) {
-	t.log.Debug("invoke login user")
+	log := logger.FromContext(ctx)
+	grpcStatus := grpcstatus.NewGRPCStatus(log)
 
-	grpcStatus := grpcstatus.NewGRPCStatus(t.log)
+	log.Debug("invoke login user")
 
 	if err := validation.ValidateEmail(req.GetEmail()); err != nil {
 		return nil, grpcStatus.Error("failed to validate email", err)
@@ -85,9 +85,10 @@ func (t *AuthGRPC) Login(ctx context.Context, req *ssov1.LoginRequest) (*ssov1.L
 }
 
 func (t *AuthGRPC) Refresh(ctx context.Context, req *ssov1.RefreshRequest) (*ssov1.RefreshResponse, error) {
-	t.log.Debug("invoke refresh session")
+	log := logger.FromContext(ctx)
+	grpcStatus := grpcstatus.NewGRPCStatus(log)
 
-	grpcStatus := grpcstatus.NewGRPCStatus(t.log)
+	log.Debug("invoke refresh session")
 
 	if err := validation.ValidateRefreshToken(req.GetRefreshToken()); err != nil {
 		return nil, grpcStatus.Error("failed to validate refresh token", err)
@@ -111,9 +112,10 @@ func (t *AuthGRPC) Refresh(ctx context.Context, req *ssov1.RefreshRequest) (*sso
 }
 
 func (t *AuthGRPC) Logout(ctx context.Context, req *ssov1.LogoutRequest) (*ssov1.Empty, error) {
-	t.log.Debug("invoke logout user")
+	log := logger.FromContext(ctx)
+	grpcStatus := grpcstatus.NewGRPCStatus(log)
 
-	grpcStatus := grpcstatus.NewGRPCStatus(t.log)
+	log.Debug("invoke logout user")
 
 	if err := validation.ValidateRefreshToken(req.GetRefreshToken()); err != nil {
 		return nil, grpcStatus.Error("failed to validate refresh token", err)

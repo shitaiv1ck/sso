@@ -7,6 +7,7 @@ import (
 
 	ssov1 "github.com/shitaiv1ck/protos/gen/go/sso"
 	"github.com/shitaiv1ck/sso/internal/core/logger"
+	grpcintrcpt "github.com/shitaiv1ck/sso/internal/core/transport/grpc/interceptor"
 	accgrpc "github.com/shitaiv1ck/sso/internal/features/account/transport/grpc"
 	authgrpc "github.com/shitaiv1ck/sso/internal/features/auth/transport/grpc"
 	"go.uber.org/zap"
@@ -20,8 +21,16 @@ type GRPCServer struct {
 }
 
 func NewGRPCServer(log *logger.Logger, config Config) *GRPCServer {
+	srv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			grpcintrcpt.Logger(log),
+			grpcintrcpt.Trace(),
+			grpcintrcpt.Panic(),
+		),
+	)
+
 	return &GRPCServer{
-		server: grpc.NewServer(),
+		server: srv,
 		log:    log,
 		config: config,
 	}

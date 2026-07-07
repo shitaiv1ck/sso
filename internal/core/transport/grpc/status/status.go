@@ -27,9 +27,9 @@ func (s *Status) Error(msg string, err error) error {
 	s.SetStatusCode(err)
 
 	if s.statusCode == codes.Internal {
-		s.log.Error(msg, zap.Error(err), zap.String("code", s.statusCode.String()))
+		s.log.Error(msg, zap.Error(err), zap.String("status", s.statusCode.String()))
 	} else {
-		s.log.Warn(msg, zap.Error(err), zap.String("code", s.statusCode.String()))
+		s.log.Warn(msg, zap.Error(err), zap.String("status", s.statusCode.String()))
 	}
 
 	return status.Error(s.statusCode, fmt.Sprintf("%s: %s", msg, err))
