@@ -14,7 +14,6 @@ type AccountGRPC struct {
 	ssov1.UnimplementedAccountServer
 
 	service AccountService
-	log     *logger.Logger
 }
 
 type AccountService interface {
@@ -22,17 +21,17 @@ type AccountService interface {
 	ChangeEmail(ctx context.Context, userID int, password string, newEmail string) error
 }
 
-func NewAccountGRPC(service AccountService, log *logger.Logger) *AccountGRPC {
+func NewAccountGRPC(service AccountService) *AccountGRPC {
 	return &AccountGRPC{
 		service: service,
-		log:     log,
 	}
 }
 
 func (t *AccountGRPC) ChangePassword(ctx context.Context, req *ssov1.PasswordRequest) (*ssov1.Empty, error) {
-	t.log.Debug("invoke change password")
+	log := logger.FromContext(ctx)
+	grpcStatus := grpcstatus.NewGRPCStatus(log)
 
-	grpcStatus := grpcstatus.NewGRPCStatus(t.log)
+	log.Debug("invoke change user password")
 
 	if err := validation.ValidateID(int(req.GetUserId())); err != nil {
 		return nil, grpcStatus.Error("failed to validate user ID", err)
@@ -58,9 +57,10 @@ func (t *AccountGRPC) ChangePassword(ctx context.Context, req *ssov1.PasswordReq
 }
 
 func (t *AccountGRPC) ChangeEmail(ctx context.Context, req *ssov1.EmailRequest) (*ssov1.Empty, error) {
-	t.log.Debug("invoke change email")
+	log := logger.FromContext(ctx)
+	grpcStatus := grpcstatus.NewGRPCStatus(log)
 
-	grpcStatus := grpcstatus.NewGRPCStatus(t.log)
+	log.Debug("invoke change user emaiil")
 
 	if err := validation.ValidateID(int(req.GetUserId())); err != nil {
 		return nil, grpcStatus.Error("failed to validate user ID", err)

@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"os"
 
 	"go.uber.org/zap"
@@ -29,4 +30,22 @@ func NewLogger(config Config) (*Logger, error) {
 	return &Logger{
 		Logger: zapLogger,
 	}, nil
+}
+
+func (l *Logger) With(fields ...zap.Field) *Logger {
+	return &Logger{
+		Logger: l.Logger.With(fields...),
+	}
+}
+
+type ctxKey string
+
+const logKey ctxKey = "log"
+
+func ContextWithLogger(ctx context.Context, log *Logger) context.Context {
+	return context.WithValue(ctx, logKey, log)
+}
+
+func FromContext(ctx context.Context) *Logger {
+	return ctx.Value(logKey).(*Logger)
 }

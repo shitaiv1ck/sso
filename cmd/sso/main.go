@@ -63,13 +63,13 @@ func main() {
 	authRedis := authredis.NewAuthRedis(redisConn)
 	authKafka := authkafka.NewAuthKafka(kafkaConn)
 	authService := authsrvc.NewAuthService(authsrvc.NewConfigMust(), authPG, connPool, authRedis, authKafka)
-	authGRPC := authgrpc.NewAuthGRPC(authService, log)
+	authGRPC := authgrpc.NewAuthGRPC(authService)
 
 	log.Debug("init feature: account...")
 	accPG := accpg.NewAccountPG(connPool)
 	accKafka := acckafka.NewAccountKafka(kafkaConn)
 	accService := accsrvc.NewAccountService(accPG, connPool, accKafka)
-	accGRPC := accgrpc.NewAccountGRPC(accService, log)
+	accGRPC := accgrpc.NewAccountGRPC(accService)
 
 	server := grpcserver.NewGRPCServer(log, grpcserver.NewConfigMust())
 	server.RegisterServices(authGRPC, accGRPC)
