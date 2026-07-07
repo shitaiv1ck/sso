@@ -23,7 +23,7 @@ gRPC-сервис для аутентификации и авторизации 
 
 ## Требования
 
-- Go 1.25+
+- Go 1.26+
 - Docker & Docker Compose
 - Make
 
@@ -348,8 +348,10 @@ Redis используется для хранения черного списк
 | Команда | Описание |
 |---------|----------|
 | `make env-up` | Запуск PostgreSQL, Redis и Kafka в Docker |
-| `make env-down` | Остановка всех контейнеров |
+| `make env-down` | Остановка контейнеров PostgreSQL, Redis и Kafka |
 | `make migrate-up` | Применение миграций |
 | `make migrate-down` | Откат миграций |
 | `make migrate-create` | Создание новой миграции (требует `seq=value`) |
 | `make sso-run` | Запуск gRPC-сервера |
+| `make sso-deploy` | Запуск gRPC-сервера в Docker |
+| `make sso-deploy-stop` | Остановка контейнера gRPC-сервера |

@@ -42,4 +42,11 @@ migrate-force:
 	force 1
 
 sso-run:
-	@go run ${PROJECT_ROOT}/cmd/sso/main.go
+	@ go mod tidy && \
+	go run ${PROJECT_ROOT}/cmd/sso/main.go
+
+sso-deploy:
+	@docker compose up --build -d sso
+
+sso-deploy-stop:
+	@docker compose down sso
