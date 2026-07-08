@@ -198,9 +198,10 @@ sso/
 │       └── main.go
 ├── internal/
 │   ├── core/                         # Общие компоненты
-│   │   ├── broker/                   # Базовый клиент для работы с Kafka
-│   │   │   ├── config.go
-│   │   │   └── kafka.go
+│   │   ├── client/                   # Клиенты для работы с внешними сервисами
+│   │   │   └── kafka/                # Базовый клиент для работы с Kafka
+│   │   │       ├── config.go
+│   │   │       └── kafka.go
 │   │   ├── domain/                   # Доменные модели
 │   │   │   ├── app.go
 │   │   │   ├── session.go
@@ -219,6 +220,8 @@ sso/
 │   │   │       ├── config.go
 │   │   │       └── redis.go
 │   │   ├── transport/                # gRPC-сервер и статусы
+│   │   │   ├── interceptor/          # gRPC интерсепторы (middleware)
+│   │   │   │   └── interceptor.go
 │   │   │   ├── server/
 │   │   │   │   ├── config.go
 │   │   │   │   └── server.go
@@ -228,9 +231,10 @@ sso/
 │   │       └── validation.go
 │   └── features/
 │       ├── account/                  # Feature: Управление аккаунтом
-│       │   ├── broker/               # Публикация событий в Kafka
-│       │   │   ├── dto.go
-│       │   │   └── producer.go
+│       │   ├── client/               # Клиенты для внешних сервисов
+│       │   │   └── kafka/            # Публикация событий в Kafka
+│       │   │       ├── dto.go
+│       │   │       └── producer.go
 │       │   ├── repository/           # Работа с PostgreSQL
 │       │   │   └── postgres/
 │       │   │       └── postgres.go
@@ -239,9 +243,10 @@ sso/
 │       │   └── transport/            # gRPC-обработчики
 │       │       └── grpc.go
 │       └── auth/                     # Feature: Аутентификация и регистрация
-│           ├── broker/               # Публикация событий в Kafka
-│           │   ├── dto.go
-│           │   └── producer.go
+│           ├── client/               # Клиенты для внешних сервисов
+│           │   └── kafka/            # Публикация событий в Kafka
+│           │       ├── dto.go
+│           │       └── producer.go
 │           ├── repository/           # Работа с PostgreSQL и Redis (черный список)
 │           │   ├── postgres/
 │           │   │   └── postgres.go
@@ -251,7 +256,10 @@ sso/
 │           │   ├── config.go
 │           │   └── service.go
 │           └── transport/            # gRPC-обработчики
-│               └── grpc.go
+│               ├── grpc.go
+│               ├── grpc_test.go
+│               └── mocks/
+│                   └── mock.go
 └── migrations/                       # SQL миграции для PostgreSQL
     ├── 000001_init.down.sql
     └── 000001_init.up.sql

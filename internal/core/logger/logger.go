@@ -32,6 +32,12 @@ func NewLogger(config Config) (*Logger, error) {
 	}, nil
 }
 
+func NewTestLogger() *Logger {
+	return &Logger{
+		Logger: zap.NewNop(),
+	}
+}
+
 func (l *Logger) With(fields ...zap.Field) *Logger {
 	return &Logger{
 		Logger: l.Logger.With(fields...),
