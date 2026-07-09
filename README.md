@@ -241,7 +241,10 @@ sso/
 │       │   ├── service/              # Бизнес-логика (ChangePassword, ChangeEmail)
 │       │   │   └── service.go
 │       │   └── transport/            # gRPC-обработчики
-│       │       └── grpc.go
+│       │       ├── grpc.go
+│       │       ├── grpc_test.go
+│       │       └── mocks/
+│       │           └── mock.go
 │       └── auth/                     # Feature: Аутентификация и регистрация
 │           ├── client/               # Клиенты для внешних сервисов
 │           │   └── kafka/            # Публикация событий в Kafka
