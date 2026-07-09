@@ -1,7 +1,6 @@
 package authgrpc
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -99,7 +98,7 @@ func TestRegister(t *testing.T) {
 			testCase.mockBehavior(authService, testCase.inputReq)
 
 			log := logger.NewTestLogger()
-			ctx := logger.ContextWithLogger(context.Background(), log)
+			ctx := logger.ContextWithLogger(t.Context(), log)
 
 			authGRPC := NewAuthGRPC(authService)
 			resp, err := authGRPC.Register(ctx, testCase.inputReq)
@@ -239,7 +238,7 @@ func TestLogin(t *testing.T) {
 			testCase.mockBehavior(authService, testCase.inputReq)
 
 			log := logger.NewTestLogger()
-			ctx := logger.ContextWithLogger(context.Background(), log)
+			ctx := logger.ContextWithLogger(t.Context(), log)
 
 			authGRPC := NewAuthGRPC(authService)
 			resp, err := authGRPC.Login(ctx, testCase.inputReq)
@@ -358,7 +357,7 @@ func TestRefresh(t *testing.T) {
 			testCase.mockBehavior(authService, testCase.inputReq)
 
 			log := logger.NewTestLogger()
-			ctx := logger.ContextWithLogger(context.Background(), log)
+			ctx := logger.ContextWithLogger(t.Context(), log)
 
 			authGRPC := NewAuthGRPC(authService)
 			resp, err := authGRPC.Refresh(ctx, testCase.inputReq)
@@ -443,7 +442,7 @@ func TestLogout(t *testing.T) {
 			testCase.mockBehavior(authService, testCase.inputReq)
 
 			log := logger.NewTestLogger()
-			ctx := logger.ContextWithLogger(context.Background(), log)
+			ctx := logger.ContextWithLogger(t.Context(), log)
 
 			authGRPC := NewAuthGRPC(authService)
 			resp, err := authGRPC.Logout(ctx, testCase.inputReq)

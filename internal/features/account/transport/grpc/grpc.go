@@ -10,6 +10,8 @@ import (
 	"github.com/shitaiv1ck/sso/internal/core/validation"
 )
 
+//go:generate mockgen -source=grpc.go -destination=mocks/mock.go
+
 type AccountGRPC struct {
 	ssov1.UnimplementedAccountServer
 
