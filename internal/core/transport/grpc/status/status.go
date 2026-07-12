@@ -39,7 +39,7 @@ func (s *Status) SetStatusCode(err error) {
 	switch {
 	case errors.Is(err, errs.ErrInvalidArg):
 		s.statusCode = codes.InvalidArgument
-	case errors.Is(err, errs.ErrAlreadyExist):
+	case errors.Is(err, errs.ErrAlreadyExists):
 		s.statusCode = codes.AlreadyExists
 	case errors.Is(err, errs.ErrInvalidCredentials):
 		s.statusCode = codes.Unauthenticated

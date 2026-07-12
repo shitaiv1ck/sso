@@ -43,7 +43,7 @@ func TestRegister(t *testing.T) {
 				Password: "12345678",
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.RegisterRequest) {
-				s.EXPECT().Register(gomock.Any(), req.GetEmail(), req.GetPassword()).Return(-1, errs.ErrAlreadyExist)
+				s.EXPECT().Register(gomock.Any(), req.GetEmail(), req.GetPassword()).Return(-1, errs.ErrAlreadyExists)
 			},
 			expectedStatus: codes.AlreadyExists,
 			expectedResp:   nil,
