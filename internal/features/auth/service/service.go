@@ -89,109 +89,117 @@ func (s *AuthService) Register(ctx context.Context, email string, password strin
 	return savedUser.ID, nil
 }
 
-func (s *AuthService) Login(ctx context.Context, email string, password string, appID int) (string, string, error) {
+func (s *AuthService) Login(ctx context.Context, email string, password string, appID int) (domain.SessionShort, error) {
 	user := domain.NewUnknownUser(email, password)
 	if err := user.Validate(); err != nil {
-		return "", "", fmt.Errorf("failed to validate user: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to validate user: %w", err)
 	}
 
 	app := domain.NewUnnamedApp(appID)
 	if err := app.Validate(); err != nil {
-		return "", "", fmt.Errorf("failed to validate app: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to validate app: %w", err)
 	}
 
 	foundUser, err := s.pg.FindUser(ctx, user)
 	if err != nil {
-		return "", "", errs.ErrInvalidCredentials
+		return domain.SessionShort{}, errs.ErrInvalidCredentials
 	}
 
 	if !foundUser.ComparePassword(user.Password) {
-		return "", "", errs.ErrInvalidCredentials
+		return domain.SessionShort{}, errs.ErrInvalidCredentials
 	}
 
 	foundApp, err := s.pg.FindApp(ctx, app)
 	if err != nil {
-		return "", "", errs.ErrInvalidCredentials
+		return domain.SessionShort{}, errs.ErrInvalidCredentials
 	}
 
 	accessToken, err := s.newAccessToken(foundUser.ID, foundApp.Name)
 	if err != nil {
-		return "", "", err
+		return domain.SessionShort{}, err
 	}
 
 	token, err := generateToken()
 	if err != nil {
-		return "", "", err
+		return domain.SessionShort{}, err
 	}
 
 	session, err := domain.NewSession(token, foundUser.ID, s.config.SessionTTL)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to create session: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to create session: %w", err)
 	}
 
 	refreshToken, err := s.pg.SaveSession(ctx, session)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to save session: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to save session: %w", err)
 	}
 
-	return accessToken, refreshToken, nil
+	return domain.SessionShort{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		TTL:          s.config.SessionTTL,
+	}, nil
 }
 
-func (s *AuthService) Refresh(ctx context.Context, refreshToken string, appID int) (string, string, error) {
+func (s *AuthService) Refresh(ctx context.Context, refreshToken string, appID int) (domain.SessionShort, error) {
 	if err := validation.ValidateRefreshToken(refreshToken); err != nil {
-		return "", "", fmt.Errorf("failed to validate refresh token: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to validate refresh token: %w", err)
 	}
 
 	if err := validation.ValidateID(appID); err != nil {
-		return "", "", fmt.Errorf("failed to validate app ID: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to validate app ID: %w", err)
 	}
 
 	app := domain.NewUnnamedApp(appID)
 	foundApp, err := s.pg.FindApp(ctx, app)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to find app: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to find app: %w", err)
 	}
 
 	tx, err := s.tx.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return "", "", fmt.Errorf("failed to start transaction: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer tx.Rollback(ctx)
 
 	deletedSession, user, err := s.pg.DeleteTXSession(ctx, tx, refreshToken)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to delete session: %w", errs.ErrRefSession)
+		return domain.SessionShort{}, fmt.Errorf("failed to delete session: %w", errs.ErrRefSession)
 	}
 
 	if deletedSession.IsExpired() {
-		return "", "", fmt.Errorf("refresh token is expired: %w", errs.ErrRefSession)
+		return domain.SessionShort{}, fmt.Errorf("refresh token is expired: %w", errs.ErrRefSession)
 	}
 
 	token, err := generateToken()
 	if err != nil {
-		return "", "", err
+		return domain.SessionShort{}, err
 	}
 
 	session, err := domain.NewSession(token, user.ID, s.config.SessionTTL)
 	if err != nil {
-		return "", "", errs.ErrRefSession
+		return domain.SessionShort{}, errs.ErrRefSession
 	}
 
 	refreshToken, err = s.pg.SaveTXSession(ctx, tx, session)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to save session: %w", errs.ErrRefSession)
+		return domain.SessionShort{}, fmt.Errorf("failed to save session: %w", errs.ErrRefSession)
 	}
 
 	accessToken, err := s.newAccessToken(user.ID, foundApp.Name)
 	if err != nil {
-		return "", "", err
+		return domain.SessionShort{}, err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return "", "", fmt.Errorf("failed to commit transaction: %w", err)
+		return domain.SessionShort{}, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return accessToken, refreshToken, nil
+	return domain.SessionShort{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		TTL:          s.config.SessionTTL,
+	}, nil
 }
 
 func (s *AuthService) newAccessToken(userID int, appName string) (string, error) {

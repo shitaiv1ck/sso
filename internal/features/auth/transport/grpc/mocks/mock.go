@@ -13,6 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	domain "github.com/shitaiv1ck/sso/internal/core/domain"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,13 +42,12 @@ func (m *MockAuthService) EXPECT() *MockAuthServiceMockRecorder {
 }
 
 // Login mocks base method.
-func (m *MockAuthService) Login(ctx context.Context, email, password string, appID int) (string, string, error) {
+func (m *MockAuthService) Login(ctx context.Context, email, password string, appID int) (domain.SessionShort, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, email, password, appID)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(domain.SessionShort)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Login indicates an expected call of Login.
@@ -71,13 +71,12 @@ func (mr *MockAuthServiceMockRecorder) Logout(ctx, refreshToken, accessToken any
 }
 
 // Refresh mocks base method.
-func (m *MockAuthService) Refresh(ctx context.Context, refreshToken string, appID int) (string, string, error) {
+func (m *MockAuthService) Refresh(ctx context.Context, refreshToken string, appID int) (domain.SessionShort, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Refresh", ctx, refreshToken, appID)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(domain.SessionShort)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Refresh indicates an expected call of Refresh.
