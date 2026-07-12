@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/redis/go-redis/v9 v9.21.0
-	github.com/shitaiv1ck/protos v1.3.4
+	github.com/shitaiv1ck/protos v1.4.1
 	github.com/stretchr/testify v1.11.1
 	github.com/twmb/franz-go v1.21.5
 	go.uber.org/mock v0.6.0

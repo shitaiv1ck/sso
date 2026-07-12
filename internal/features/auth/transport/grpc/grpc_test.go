@@ -3,8 +3,10 @@ package authgrpc
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	ssov1 "github.com/shitaiv1ck/protos/gen/go/sso"
+	"github.com/shitaiv1ck/sso/internal/core/domain"
 	errs "github.com/shitaiv1ck/sso/internal/core/errors"
 	"github.com/shitaiv1ck/sso/internal/core/logger"
 	mock_authgrpc "github.com/shitaiv1ck/sso/internal/features/auth/transport/grpc/mocks"
@@ -128,13 +130,22 @@ func TestLogin(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.LoginRequest) {
 				s.EXPECT().Login(gomock.Any(), req.GetEmail(), req.GetPassword(), int(req.GetAppId())).Return(
-					"test.test.test",
-					"test",
+					domain.SessionShort{
+						AccessToken:  "test.test.test",
+						RefreshToken: "test",
+						TTL:          30 * time.Second,
+					},
 					nil,
 				)
 			},
 			expectedStatus: codes.OK,
-			expectedResp:   &ssov1.LoginResponse{AccessToken: "test.test.test", RefreshToken: "test"},
+			expectedResp: &ssov1.LoginResponse{
+				AccessToken:  "test.test.test",
+				RefreshToken: "test",
+				SessionTtl: &ssov1.Duration{
+					Seconds: int64(30),
+				},
+			},
 		},
 		{
 			name: "Invalid credentials",
@@ -145,8 +156,7 @@ func TestLogin(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.LoginRequest) {
 				s.EXPECT().Login(gomock.Any(), req.GetEmail(), req.GetPassword(), int(req.GetAppId())).Return(
-					"",
-					"",
+					domain.SessionShort{},
 					errs.ErrInvalidCredentials,
 				)
 			},
@@ -162,8 +172,7 @@ func TestLogin(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.LoginRequest) {
 				s.EXPECT().Login(gomock.Any(), req.GetEmail(), req.GetPassword(), int(req.GetAppId())).Return(
-					"",
-					"",
+					domain.SessionShort{},
 					errs.ErrKeyNotConfigured,
 				)
 			},
@@ -219,8 +228,7 @@ func TestLogin(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.LoginRequest) {
 				s.EXPECT().Login(gomock.Any(), req.GetEmail(), req.GetPassword(), int(req.GetAppId())).Return(
-					"",
-					"",
+					domain.SessionShort{},
 					fmt.Errorf("some internal error"),
 				)
 			},
@@ -267,8 +275,11 @@ func TestRefresh(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.RefreshRequest) {
 				s.EXPECT().Refresh(gomock.Any(), req.GetRefreshToken(), int(req.GetAppId())).Return(
-					"test.test.test",
-					"90ARI/q1v7B4btJFr8RT+FvGRC3pL/ht2h8QAdf7dyY=",
+					domain.SessionShort{
+						AccessToken:  "test.test.test",
+						RefreshToken: "90ARI/q1v7B4btJFr8RT+FvGRC3pL/ht2h8QAdf7dyY=",
+						TTL:          30 * time.Second,
+					},
 					nil,
 				)
 			},
@@ -276,6 +287,9 @@ func TestRefresh(t *testing.T) {
 			expectedResp: &ssov1.RefreshResponse{
 				AccessToken:  "test.test.test",
 				RefreshToken: "90ARI/q1v7B4btJFr8RT+FvGRC3pL/ht2h8QAdf7dyY=",
+				SessionTtl: &ssov1.Duration{
+					Seconds: int64(30),
+				},
 			},
 		},
 		{
@@ -286,8 +300,7 @@ func TestRefresh(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.RefreshRequest) {
 				s.EXPECT().Refresh(gomock.Any(), req.GetRefreshToken(), int(req.GetAppId())).Return(
-					"",
-					"",
+					domain.SessionShort{},
 					errs.ErrRefSession,
 				)
 			},
@@ -302,8 +315,7 @@ func TestRefresh(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.RefreshRequest) {
 				s.EXPECT().Refresh(gomock.Any(), req.GetRefreshToken(), int(req.GetAppId())).Return(
-					"",
-					"",
+					domain.SessionShort{},
 					errs.ErrNotFound,
 				)
 			},
@@ -338,8 +350,7 @@ func TestRefresh(t *testing.T) {
 			},
 			mockBehavior: func(s *mock_authgrpc.MockAuthService, req *ssov1.RefreshRequest) {
 				s.EXPECT().Refresh(gomock.Any(), req.GetRefreshToken(), int(req.GetAppId())).Return(
-					"",
-					"",
+					domain.SessionShort{},
 					fmt.Errorf("some internal error"),
 				)
 			},

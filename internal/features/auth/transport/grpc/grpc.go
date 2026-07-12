@@ -4,6 +4,7 @@ import (
 	"context"
 
 	ssov1 "github.com/shitaiv1ck/protos/gen/go/sso"
+	"github.com/shitaiv1ck/sso/internal/core/domain"
 	errs "github.com/shitaiv1ck/sso/internal/core/errors"
 	"github.com/shitaiv1ck/sso/internal/core/logger"
 	grpcstatus "github.com/shitaiv1ck/sso/internal/core/transport/grpc/status"
@@ -20,8 +21,8 @@ type AuthGRPC struct {
 
 type AuthService interface {
 	Register(ctx context.Context, email string, password string) (int, error)
-	Login(ctx context.Context, email string, password string, appID int) (string, string, error)
-	Refresh(ctx context.Context, refreshToken string, appID int) (string, string, error)
+	Login(ctx context.Context, email string, password string, appID int) (domain.SessionShort, error)
+	Refresh(ctx context.Context, refreshToken string, appID int) (domain.SessionShort, error)
 	Logout(ctx context.Context, refreshToken string, accessToken string) error
 }
 
@@ -73,14 +74,17 @@ func (t *AuthGRPC) Login(ctx context.Context, req *ssov1.LoginRequest) (*ssov1.L
 		return nil, grpcStatus.Error("failed to validate app ID", err)
 	}
 
-	accessToken, refreshToken, err := t.service.Login(ctx, req.GetEmail(), req.GetPassword(), int(req.GetAppId()))
+	session, err := t.service.Login(ctx, req.GetEmail(), req.GetPassword(), int(req.GetAppId()))
 	if err != nil {
 		return nil, grpcStatus.Error("failed to login user", err)
 	}
 
 	response := &ssov1.LoginResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:  session.AccessToken,
+		RefreshToken: session.RefreshToken,
+		SessionTtl: &ssov1.Duration{
+			Seconds: int64(session.TTL.Seconds()),
+		},
 	}
 
 	return response, nil
@@ -100,14 +104,17 @@ func (t *AuthGRPC) Refresh(ctx context.Context, req *ssov1.RefreshRequest) (*sso
 		return nil, grpcStatus.Error("failed to validate app ID", err)
 	}
 
-	accessToken, refreshToken, err := t.service.Refresh(ctx, req.GetRefreshToken(), int(req.GetAppId()))
+	session, err := t.service.Refresh(ctx, req.GetRefreshToken(), int(req.GetAppId()))
 	if err != nil {
 		return nil, grpcStatus.Error("failed to refresh session", err)
 	}
 
 	response := &ssov1.RefreshResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:  session.AccessToken,
+		RefreshToken: session.RefreshToken,
+		SessionTtl: &ssov1.Duration{
+			Seconds: int64(session.TTL.Seconds()),
+		},
 	}
 
 	return response, nil

@@ -55,3 +55,9 @@ func (s *Session) Validate() error {
 func (s *Session) IsExpired() bool {
 	return s.ExpiresAt.Before(time.Now())
 }
+
+type SessionShort struct {
+	RefreshToken string
+	AccessToken  string
+	TTL          time.Duration
+}
