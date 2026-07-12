@@ -45,7 +45,7 @@ func (r *AuthPostgres) SaveUser(ctx context.Context, user domain.User) (domain.U
 		var pgxErr *pgconn.PgError
 		if errors.As(err, &pgxErr) {
 			if pgxErr.Code == "23505" {
-				return domain.User{}, fmt.Errorf("user with email=%v alredy exist: %w", user.Email, errs.ErrAlreadyExist)
+				return domain.User{}, fmt.Errorf("user with email=%v alredy exists: %w", user.Email, errs.ErrAlreadyExists)
 			}
 		}
 

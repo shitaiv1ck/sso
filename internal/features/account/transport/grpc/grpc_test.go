@@ -193,7 +193,7 @@ func TestChangeEmail(t *testing.T) {
 				NewEmail: "test@test.com",
 			},
 			mockBehavior: func(s *mock_accgrpc.MockAccountService, req *ssov1.EmailRequest) {
-				s.EXPECT().ChangeEmail(gomock.Any(), int(req.GetUserId()), req.GetPassword(), req.GetNewEmail()).Return(errs.ErrAlreadyExist)
+				s.EXPECT().ChangeEmail(gomock.Any(), int(req.GetUserId()), req.GetPassword(), req.GetNewEmail()).Return(errs.ErrAlreadyExists)
 			},
 			expectedStatus: codes.AlreadyExists,
 			expectedResp:   nil,

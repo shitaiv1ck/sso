@@ -66,7 +66,7 @@ func (r *AccountPostgres) UpdateTXUser(ctx context.Context, tx postgres.SQLExecu
 		var pgxErr *pgconn.PgError
 		if errors.As(err, &pgxErr) {
 			if pgxErr.Code == "23505" {
-				return errs.ErrAlreadyExist
+				return errs.ErrAlreadyExists
 			}
 		}
 
