@@ -100,6 +100,10 @@ func (s *AccountService) ChangeEmail(ctx context.Context, userID int, password s
 		return err
 	}
 
+	if !user.ComparePassword(password) {
+		return fmt.Errorf("invalid password: %w", errs.ErrInvalidArg)
+	}
+
 	if user.Email == newEmail {
 		return fmt.Errorf("new email can't be equal current email: %w", errs.ErrInvalidArg)
 	}
